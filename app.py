@@ -379,21 +379,20 @@ def health():
 # =====================
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    api_key = os.environ.get('ANTHROPIC_API_KEY')
-    if not api_key:
-        return jsonify({'error': 'ANTHROPIC_API_KEY no configurada'}), 500
-
     data = request.get_json()
     messages = data.get('messages', [])
 
     if not messages:
         return jsonify({'error': 'No messages provided'}), 400
 
-    try:
-        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'API key no configurada'}), 500
 
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=400,
             system="""You are Emma, a friendly and encouraging English teacher for Spanish-speaking students from Latin America. Your role is to:
 
@@ -410,19 +409,13 @@ FORMAT your responses like this:
 - Keep your response concise (2-4 sentences max for the main reply)
 - Be warm, patient, and motivating
 
-Example:
-User: "I go to park yesterday with my friends"
-Emma: "That sounds fun! Parks are great for relaxing with friends. What did you do there?
-
-💡 Corrección: "I go" → "I went" (usamos pasado: "went" no "go"). "to park" → "to the park" (necesita artículo "the")."
-
 Never be harsh. Always celebrate effort and progress!""",
             messages=messages
         )
-
         return jsonify({'reply': response.content[0].text})
 
     except Exception as e:
+        print(f"ERROR en /api/chat: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # =====================
