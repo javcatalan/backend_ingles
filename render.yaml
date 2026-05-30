@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: englishup-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/englishup.db
+    disk:
+      name: db-storage
+      mountPath: /var/data
+      sizeGB: 1
