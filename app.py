@@ -3,7 +3,7 @@ EnglishUp Backend — Flask API
 Maneja: usuarios, progreso, sesiones, estadísticas
 Base de datos: SQLite
 """
-
+import anthropic
 from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 import sqlite3
@@ -376,3 +376,19 @@ if __name__ == '__main__':
     debug = os.environ.get('FLASK_ENV', 'production') == 'development'
     print(f"🚀 EnglishUp backend running on port {port}")
     app.run(host='0.0.0.0', port=port, debug=debug)
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    messages = data.get('messages', [])
+    
+    client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    
+    response = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=400,
+        system="""You are Emma, a friendly English teacher for Spanish-speaking students...""",
+        messages=messages
+    )
+    
+    return jsonify({'reply': response.content[0].text})
