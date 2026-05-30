@@ -379,6 +379,10 @@ def health():
 # =====================
 @app.route('/api/chat', methods=['POST'])
 def chat():
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'ANTHROPIC_API_KEY no configurada'}), 500
+
     data = request.get_json()
     messages = data.get('messages', [])
 
