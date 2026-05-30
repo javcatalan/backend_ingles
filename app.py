@@ -15,7 +15,11 @@ from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'englishup-secret-dev-2024')
-CORS(app, supports_credentials=True, origins=['*'])
+CORS(app, supports_credentials=True, origins=[
+    'https://javcatalan.github.io',
+    'http://localhost:3000',
+    'http://127.0.0.1:5500',
+])
 
 DB_PATH = os.environ.get('DB_PATH', 'englishup.db')
 
