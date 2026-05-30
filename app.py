@@ -336,6 +336,9 @@ def log_chat():
 # =====================
 # LEADERBOARD
 # =====================
+# =====================
+# LEADERBOARD
+# =====================
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
     with get_db() as conn:
@@ -368,6 +371,53 @@ def health():
     return jsonify({'status': 'ok', 'timestamp': datetime.now().isoformat()})
 
 # =====================
+# CHATBOT
+# =====================
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    messages = data.get('messages', [])
+
+    if not messages:
+        return jsonify({'error': 'No messages provided'}), 400
+
+    try:
+        client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=400,
+            system="""You are Emma, a friendly and encouraging English teacher for Spanish-speaking students from Latin America. Your role is to:
+
+1. CONVERSE naturally in English with the student
+2. CORRECT grammar and spelling mistakes in a friendly way
+3. EXPLAIN corrections briefly in Spanish when needed
+4. ENCOURAGE the student with positive reinforcement
+5. Ask follow-up questions to keep the conversation going
+6. Adjust your English level to the student's apparent proficiency
+
+FORMAT your responses like this:
+- Start with your natural reply to what they said
+- If there are errors, add a correction section starting with "💡 Corrección:"
+- Keep your response concise (2-4 sentences max for the main reply)
+- Be warm, patient, and motivating
+
+Example:
+User: "I go to park yesterday with my friends"
+Emma: "That sounds fun! Parks are great for relaxing with friends. What did you do there?
+
+💡 Corrección: "I go" → "I went" (usamos pasado: "went" no "go"). "to park" → "to the park" (necesita artículo "the")."
+
+Never be harsh. Always celebrate effort and progress!""",
+            messages=messages
+        )
+
+        return jsonify({'reply': response.content[0].text})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# =====================
 # INIT
 # =====================
 if __name__ == '__main__':
@@ -376,19 +426,3 @@ if __name__ == '__main__':
     debug = os.environ.get('FLASK_ENV', 'production') == 'development'
     print(f"🚀 EnglishUp backend running on port {port}")
     app.run(host='0.0.0.0', port=port, debug=debug)
-
-@app.route('/api/chat', methods=['POST'])
-def chat():
-    data = request.get_json()
-    messages = data.get('messages', [])
-    
-    client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
-    
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=400,
-        system="""You are Emma, a friendly English teacher for Spanish-speaking students...""",
-        messages=messages
-    )
-    
-    return jsonify({'reply': response.content[0].text})
