@@ -80,7 +80,7 @@ def init_db():
         ''')
 
 # =====================
-# HELPERS
+# HELPERS 
 # =====================
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
@@ -215,7 +215,7 @@ def me():
     })
 
 # =====================
-# PROGRESS ROUTES
+# PROGRESS ROUTES 
 # =====================
 @app.route('/api/progress', methods=['GET'])
 @login_required
@@ -393,8 +393,8 @@ def chat():
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=400,
-            system="""You are Emma, a friendly and encouraging English teacher for Spanish-speaking students from Latin America. Your role is to:
+            max_tokens=250,
+            system="""You are Tutor IA, a friendly and encouraging English teacher for Spanish-speaking students from Latin America. Your role is to:
 
 1. CONVERSE naturally in English with the student
 2. CORRECT grammar and spelling mistakes in a friendly way
@@ -410,7 +410,7 @@ FORMAT your responses like this:
 - Be warm, patient, and motivating
 
 Never be harsh. Always celebrate effort and progress!""",
-            messages=messages
+            messages=messages[-6:]
         )
         return jsonify({'reply': response.content[0].text})
 
